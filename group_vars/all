@@ -1,0 +1,26 @@
+#####################################################################################
+## Below are the package that will be installed. You can add package names         ##
+#####################################################################################
+packages_to_be_installed:
+  - aptitude
+  - isc-dhcp-server
+
+#####################################################################################
+## If you want to pass custom values to /etc/dhcp/dhcpd.conf. Please uncomment     ##
+## and updateas required                                                           ##
+#####################################################################################
+
+#subnet:
+#netmask:
+#start_range:
+#end_range:
+#broadcast_address:
+#domain_name_servers:
+#routers:
+#max_lease_time:
+#domian_name:
+
+#####################################################################################
+## Setup System Hostname. By Default its kubemaster-pi                             ##
+#####################################################################################
+#hostname:
