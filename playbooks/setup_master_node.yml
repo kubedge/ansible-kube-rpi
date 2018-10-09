@@ -1,0 +1,52 @@
+---
+- name: Setup Master Node
+  hosts: "{{ hostname | default('127.0.0.1') }}"
+  sudo: yes
+  gather_facts: false
+  vars_files:
+      - ../group_vars/all
+  tasks:
+  - name: Update repositories cache and install aptitude required for apt-get upgrade
+    apt: name={{ item }} state=latest update_cache=yes
+    with_items: "{{ packages_to_be_installed }}"
+
+  - name: upgrade packages
+    apt: upgrade=yes
+
+  - name: Comment Configurations in dhcpd.conf
+    replace: dest="/etc/dhcp/dhcpd.conf" regexp="^option domain-name" replace="# option domain-name"
+
+  - name: Update dhcpd.conf Config File
+    blockinfile:
+      dest: /etc/dhcp/dhcpd.conf
+      block: |
+        subnet {{ subnet | default('192.168.2.0') }} netmask {{ netmask | default('255.255.255.0') }} {
+                range {{ start_range | default('192.168.2.100') }} {{ end_range | default('192.168.2.200') }};
+                option broadcast-address {{ broadcast_address | default('192.168.2.255') }};
+                option domain-name-servers {{ domain_name_servers | default('8.8.8.8') }};
+                option routers {{ routers | default('192.168.2.1') }};
+                max-lease-time {{ max_lease_time | default('7200') }};
+                option domian-name {{ domian_name | default('raspi') }};
+        }
+
+  - name: On what interfaces should the DHCP server serve DHCP requests
+    replace: dest="/etc/default/isc-dhcp-server" regexp='^INTERFACESv4=""' replace='INTERFACESv4="eth0"'
+
+  - name: Copy Interface File
+    copy: src='../files/interfaces' dest='/etc/network/interfaces' owner=root group=root mode=0644
+
+  - name: Copy eth0 interface File
+    template: src='../files/eth0.j2' dest='/etc/network/interfaces.d/eth0' owner=bin group=root mode=0644
+
+  - name: Copy lo interface File
+    template: src='../files/lo.j2' dest='/etc/network/interfaces.d/lo' owner=bin group=root mode=0644
+
+  - name: Copy Hosts Files
+    template: src='../files/hosts.j2' dest='/etc/hosts' owner=root group=root mode=0644
+    tags: test
+
+  - name: Set ip forwarding on in /proc and in the sysctl file and reload if necessary
+    sysctl: name='net.ipv4.ip_forward' value=1 sysctl_set=yes state=present reload=yes
+
+  - name: Setup System Hostname
+    hostname: name='{{ hostname | default('kubemaster-pi') }}'
