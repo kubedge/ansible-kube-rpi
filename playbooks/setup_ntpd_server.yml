@@ -1,0 +1,48 @@
+---
+- name: Setup NTPD Server
+  hosts: "{{ hostname | default('127.0.0.1') }}"
+  sudo: yes
+  gather_facts: false
+  vars_files:
+      - ../group_vars/all
+  tasks:
+
+      - name: Set timezone to Aerica/Chicago
+        timezone:
+           name: America/Chicago 
+
+      - name: Get Broadcast IP
+        shell: ip a s dev eth0| awk '/inet / {print $4}'
+        register: broadcast
+
+      - name: Print the broadcast IP
+        debug: var=broadcast.stdout
+        
+      - name: Install NTP server
+        package:
+           name: ntp
+           state: present
+
+      - name: Enter the broadcastIP in ntp.conf
+        lineinfile:
+           path: /etc/ntp.conf
+           insertafter: '#broadcast'
+           line: 'broadcast  {{ broadcast }}'
+
+       - name: Restart NTP server
+         service:
+            name: ntpd
+            state: restarted
+
+       - name: Run ntpq -c lpeer and check the broadcast IP is present
+         shell: ntpq -c lpeer
+         register: ntpq
+
+       - name: Print the output ntpq
+         debug: var=ntpq.stdout_lines
+
+       - name: Ensure NTP is running and enabled as configured.
+         service:
+            name: ntp
+            state: started
+            enabled: true

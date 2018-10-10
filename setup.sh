@@ -39,6 +39,15 @@ install_ansible() {
   sudo apt-get install --upgrade ansible -y
 }
 
+install_ntp() {
+  ntp_version=`sudo apt-cache policy ntp | grep --color -i Candidate | awk '{print $2}'`
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  echo "$(tput setaf 2)==== Installing and Upgrading NTP to $ntp_version =====$(tput setaf 9)"
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  ansible-playbook  playbooks/setup_ntpd_server.yml
+}
+
+
 setup_node() {
   echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
   echo "$(tput setaf 2)========================== Setup Node =========================$(tput setaf 9)"
