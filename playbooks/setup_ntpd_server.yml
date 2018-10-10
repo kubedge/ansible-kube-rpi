@@ -1,0 +1,35 @@
+---
+- name: Setup NTPD Server
+  hosts: "{{ hostname | default('127.0.0.1') }}"
+  sudo: yes
+  gather_facts: false
+  vars_files:
+      - ../group_vars/all
+  tasks:
+
+      - name: Get broadcast IP
+        shell: ip a s dev eth0| awk '/inet / {print $4}'
+        register: broadcast
+
+      - name: Print the broadcast IP
+        debug: var=broadcast.stdout
+        
+      - name: Install NTP server
+        package:
+           name: ntp
+           state: present
+
+      - name: Enter the broadcastIP in ntp.conf
+        shell: sudo sed -i '/#broadcast /a broadcast  {{ broadcast }}' /etc/ntp.conf;
+
+       - name: Restart NTP server
+         service:
+            name: ntpd
+            state: restarted
+
+       - name: Run ntpq -c lpeer and check the broadcast IP is present
+         shell: ntpq -c lpeer
+         register: ntpq
+
+       - name: Print the output ntpq
+         debug: var=ntpq.stdout_lines
