@@ -1,5 +1,10 @@
 # ansible-kube-rpi
+
+## Overview
+
 Deploy Resilient Kubernetes in Raspberry Pi
+
+## Procedure
 
 Clone kubedge repo
 
@@ -32,3 +37,4 @@ Setup DHCP, NAT, Hostname, Hosts and Reboot Node
 ```bash
 ./setup.sh setup_node
 ```
+
