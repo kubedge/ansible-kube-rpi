@@ -8,19 +8,19 @@ setup_wifi() {
   echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
   echo "$(tput setaf 2)====================== Setup Wifi =============================$(tput setaf 9)"
   echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
-  cat > /tmp/destfile << EOF
+  cat > /etc/network/interfaces.d/wlan0 << EOF
   auto wlan0
   iface wlan0 inet dhcp
           wpa-ssid $wifiname
           wpa-psk $wifipassword
 EOF
-#  sudo ifdown wlan0 && sleep 3
-#  sudo ifup wlan0 && sleep 10
-#  case "$(curl -s --max-time 2 -I http://security.debian.org | sed 's/^[^ ]*  *\([0-9]\).*/\1/; 1q')" in
-#    [23]) echo "HTTP connectivity is up, Wifi is up Hurry";;
-#    5) echo "The web proxy won't let us through";;
-#    *) echo "The Wifi is Not Setup Properly, Please run ./setup setup_wifi --wifiname='WIFINAME' --wifipassword='wifipassword' with proper credentials";;
-#  esac
+  sudo ifdown wlan0 && sleep 3
+  sudo ifup wlan0 && sleep 10
+  case "$(curl -s --max-time 2 -I http://security.debian.org | sed 's/^[^ ]*  *\([0-9]\).*/\1/; 1q')" in
+    [23]) echo "HTTP connectivity is up, Wifi is up Hurry";;
+    5) echo "The web proxy won't let us through";;
+    *) echo "The Wifi is Not Setup Properly, Please run ./setup setup_wifi --wifiname='WIFINAME' --wifipassword='wifipassword' with proper credentials";;
+  esac
 }
 
 usage() {
@@ -59,7 +59,7 @@ setup_node() {
 
 setup_inventory() {
   echo "[kube_host]"
-  arp-scan --interface=eth0 --localnet| \
+  sudo arp-scan --interface=eth0 --localnet| \
 	grep "^[0-9].[0-9].[0-9].[0-9].*[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]" |\
         awk -F'\t' -v \
         fmt="localmachine ansible_ssh_host='%s' ansible_connection=ssh ansible_ssh_user='pirate' ansible_ssh_pass='hypriot' ansible_ssh_pass='hypriot'\n" \
@@ -76,19 +76,19 @@ else
   WIFINAME=""
   WIFIPASSWORD=""
   case $1 in
-    setup_wifi) 
+    setup_wifi)
 	shift
-	while [ "$1" != "" ]; do 
-	    case $1 in 
-	        --wifiname ) shift 
+	while [ "$1" != "" ]; do
+	    case $1 in
+	        --wifiname ) shift
 	                     WIFINAME=$1
-	        ;; 
-	        --wifipassword ) shift 
+	        ;;
+	        --wifipassword ) shift
 	                     WIFIPASSWORD=$1
-	        ;; 
-                * ) usage 
-	            exit 1 
-	    esac 
+	        ;;
+                * ) usage
+	            exit 1
+	    esac
 	    shift
         done
         setup_wifi $WIFINAME $WIFIPASSWORD
