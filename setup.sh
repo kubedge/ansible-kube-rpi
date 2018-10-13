@@ -60,9 +60,10 @@ setup_node() {
 setup_inventory() {
   echo "[kube_host]"
   arp-scan --interface=eth0 --localnet| \
+	grep "^[0-9].[0-9].[0-9].[0-9].*[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]" |\
         awk -F'\t' -v \
         fmt="localmachine ansible_ssh_host='%s' ansible_connection=ssh ansible_ssh_user='pirate' ansible_ssh_pass='hypriot' ansible_ssh_pass='hypriot'\n" \
-        '$2 ~ /([0-9a-f][0-9a-f]:){5}/ {printf fmt,  $1}'
+        '{printf fmt,  $1}'
 
   echo
   echo "[kube_master]"
