@@ -66,18 +66,11 @@ setup_node() {
   sleep 2 && sudo reboot
 }
 
-setup_inventory() {
-  echo "[kube_host]"
-  sudo arp-scan --interface=eth0 --localnet| \
-	grep "^[0-9].[0-9].[0-9].[0-9].*[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]:[0-9a-f][0-9a-f]" |\
-        awk -F'\t' -v \
-        fmt="localmachine ansible_ssh_host='%s' ansible_connection=ssh ansible_ssh_user='pirate' ansible_ssh_pass='hypriot' ansible_ssh_pass='hypriot'\n" \
-        '{printf fmt,  $1}'
 
-  echo
-  echo "[kube_master]"
-  echo "localmachine ansible_ssh_host=127.0.0.1 ansible_connection=ssh ansible_ssh_user='pirate' ansible_ssh_pass='hypriot' ansible_ssh_pass='hypriot'"
+setup_inventory() {
+  python ./makeinv.py --connect-address 192.168.2.1 
 }
+
 
 if [ $# -eq 0 ]; then
   usage
@@ -106,7 +99,7 @@ else
     ;;
     setup_node) setup_node
     ;;
-    setup_inventory) setup_inventory >inventory
+    setup_inventory) setup_inventory 
     ;;
     *)
     usage
