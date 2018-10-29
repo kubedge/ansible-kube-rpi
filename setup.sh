@@ -43,7 +43,7 @@ install_ansible() {
 install_ntp() {
   ntp_version=`sudo apt-cache policy ntp | grep --color -i Candidate | awk '{print $2}'`
   echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
-  echo "$(tput setaf 2)==== Installing and Upgrading NTP to $ntp_version =====$(tput setaf 9)"
+  echo "$(tput setaf 2)========= Installing and Upgrading NTP to $ntp_version ========$(tput setaf 9)"
   echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
   ansible-playbook  playbooks/setup_ntpd_server.yml
 }
@@ -68,9 +68,31 @@ setup_node() {
 
 
 setup_inventory() {
-  python ./makeinv.py --connect-address 192.168.2.1 
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  echo "$(tput setaf 2)====================== Setup Inventory ========================$(tput setaf 9)"
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  python ./makeinv.py --connect-address 192.168.2.1 ##Todo: Dynamic from group_var/all
 }
 
+setup_kubernetes() {
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  echo "$(tput setaf 2)================ Setup Kuberntes and Flannel ==================$(tput setaf 9)"
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  ##Todo
+}
+
+setup_helm() {
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  echo "$(tput setaf 2)====================== Setup Helm ========================$(tput setaf 9)"
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  #Todo:
+}
+
+setup_monitoring() {
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+  echo "$(tput setaf 2)================== Setup Monitoring Solution ==================$(tput setaf 9)"
+  echo "$(tput setaf 2)===============================================================$(tput setaf 9)"
+}
 
 if [ $# -eq 0 ]; then
   usage
@@ -97,9 +119,17 @@ else
     ;;
     install_ansible) install_ansible
     ;;
+    install_ansible) install_ntp
+    ;;
     setup_node) setup_node
     ;;
-    setup_inventory) setup_inventory 
+    setup_inventory) setup_inventory
+    ;;
+    setup_inventory) setup_kubernetes
+    ;;
+    setup_inventory) setup_helm
+    ;;
+    setup_inventory) setup_monitoring
     ;;
     *)
     usage
